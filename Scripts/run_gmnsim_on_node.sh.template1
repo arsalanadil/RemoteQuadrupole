@@ -1,0 +1,127 @@
+#!/bin/sh
+#PBS -N gmnsim
+#PBS -q batch
+
+# shell script to run queeg on quark
+
+echo " "
+echo    "//////////////////////////////////////////////////////////////////////"
+echo    "//"
+echo -n "// Starting nde simulation run on ";hostname
+echo    "//"
+echo    "////////////////////////////////////////////////////////////////////// "
+echo " "
+echo It is now `date` at the start.
+echo " "
+
+# define subdirectories needed to run code.
+WORKAREA=/tmp/keegan/ndesim
+GMNAREA=/home/keegan/pyth
+
+echo "The work area is ${WORKAREA}/${CASE}. The GMNAREA is ${GMNAREA}."
+
+# templates for inputs inserted with sed in submit_eodSim.pl
+case=;
+nevents=;
+source_dir=;
+remote_dir=;
+
+# print out the inputs inserted by submit_eodSim.pl
+echo "Parameters:"
+echo "   case="$case
+echo "   nevents="$nevents
+echo "   source_dir="$source_dir
+echo "   remote_dir="$remote_dir
+
+# Which node am I using?
+echo I was given the following slots to run:
+cat ${PBS_NODEFILE}
+echo " ";
+
+# delete old directories on remote nodes and create them anew for this run.
+rm -r ${WORKAREA}/$case
+mkdir -p ${WORKAREA}/$case
+
+# move the appropriate input data to the remote node.
+cp $GMNAREA/Neutron_Efficiency/Event_Generation/inelastic1  ${WORKAREA}/$case
+cp $GMNAREA/Neutron_Efficiency/Neutron_Efficiency_Analysis/neutronEfficiencyTBT.groovy  ${WORKAREA}/$case
+cp $GMNAREA/clas12.gcard  ${WORKAREA}/$case
+echo "Local files:";
+echo " ";
+cd ${WORKAREA}/$case 
+pwd
+ls -la 
+
+echo " "
+echo -n "=============== Start of nde simulation run on ";date
+echo " "
+startTime=$(date +"%s")
+
+# run PYTHIA to generate events. creates epin.dat in LUND format for gemc input.
+
+echo ;echo "Starting. Generate events with PYTHIA. ******************************"; echo
+seed=$(od -vAn -N3 -tu < /dev/urandom)
+./inelastic1 -n $nevents -n_print 1000 -theta_min 8 -theta_max 37 -Q2_max 20.0 -o epin.dat -seed $seed
+echo ;echo "Done generating events with PYTHIA!. *********************************"; echo
+echo " ";
+
+# run gemc. creates e_pi_n.ev for reconstruction input.
+
+echo ;echo "Simulate events with gemc. ******************************"; echo 
+gemc -gcard=clas12.gcard -USE_GUI=0 -N=$nevents -INPUT_GEN_FILE="LUND, epin.dat" -RUNNO=11
+echo ;echo "Done with gemc!. *********************************"; echo 
+echo " ";
+
+# run reconstruction. creates e_pi_n_Rec.0.evio for analysis input.
+
+echo ;echo "Reconstruct simulated events. ******************************"; echo
+/home/keegan/coatjava/bin/clas12-reconstruction -i e_pi_n.ev -o e_pi_n_Rec.evio -config CCDB::CALIBRUN=11
+echo ;echo "Done with reconstruction!. *********************************"; echo
+echo " ";
+
+# run analysis. creates e_pi_n_NDE_$case.0.evio.
+
+#echo ;echo "Analyzing reconstructed events. ******************************"; echo
+#/home/keegan/coatjava/bin/run-groovy neutronEfficiencyTBT.groovy ./e_pi_n_Rec.0.evio
+#echo ;echo "Done with analysis!. *********************************"; echo
+#echo " ";
+
+
+echo It is now `date`.
+
+
+# Copy output files back to the master.
+if [ "$case" -lt 10 ]
+    then
+    echo "The work area is ${WORKAREA}/$case. The run area is ${GMNAREA}."
+    ls -la
+    cp $WORKAREA/$case/e_pi_n.ev $GMNAREA/run/results/e_pi_n000$case.ev
+    cp $WORKAREA/$case/e_pi_n_Rec.0.evio $GMNAREA/run/recresults/e_pi_n_Rec_000$case.ev
+    elif  [ $case -lt 100 ] 
+    then
+    echo "The work area is ${WORKAREA}/$case."
+    ls -la
+    cp $WORKAREA/$case/e_pi_n.ev $GMNAREA/run/results/e_pi_n00$case.ev
+    cp $WORKAREA/$case/e_pi_n_Rec.0.evio $GMNAREA/run/recresults/e_pi_n_Rec_00$case.ev
+    elif [ $case -lt 1000 ] 
+    then
+    echo "The work area is ${WORKAREA}/$case."
+    ls -la
+    cp $WORKAREA/$case/e_pi_n.ev $GMNAREA/run/results/e_pi_n0$case.ev
+    cp $WORKAREA/$case/e_pi_n_Rec.0.evio $GMNAREA/run/recresults/e_pi_n_Rec_0$case.ev
+    else
+    echo "The work area is ${WORKAREA}/$case."
+    ls -la
+    cp $WORKAREA/$case/e_pi_n.ev $GMNAREA/run/results/e_pi_n$case.ev
+    cp $WORKAREA/$case/e_pi_n_Rec.0.evio $GMNAREA/run/recresults/e_pi_n_Rec_$case.ev
+fi
+
+
+echo " ";
+echo It is now `date` at the end of the run.
+echo " "
+stopTime=$(date +"%s")
+diff=$(($stopTime-$startTime))
+
+echo "Case $case with $nevents events took a total of $(($diff / 60)) minutes and $(($diff % 60)) seconds."
+

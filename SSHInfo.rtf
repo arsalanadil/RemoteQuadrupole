@@ -1,0 +1,112 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf820
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 AndaleMono;}
+{\colortbl;\red255\green255\blue255;\red47\green255\blue18;\red0\green0\blue0;\red0\green0\blue0;
+\red255\green255\blue255;}
+{\*\expandedcolortbl;;\cssrgb\c15686\c99608\c7843;\csgray\c0\c90000;\csgenericrgb\c0\c0\c0;
+\csgenericrgb\c100000\c100000\c100000;}
+\margl1440\margr1440\vieww13640\viewh12960\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Basics, Tips, and Tricks of SSH:\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b \cf0 To SSH to quark:\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b0 \cf0 Note: The IP address to your iMac is: 141.166.220.134 (I have set it to static).\
+	Username: arsalanadil\
+	Password: 1947\
+\
+\
+ssh aa9pb@quark.richmond.edu\
+Then enter password, \'93Pawnay14August1947\'94\
+\
+To scp:\
+\
+scp [from] [to]\
+\
+scp /path-to-file/filename [on local computer] aa9pb@quark.richmond.edu:/home/aa9pb\
+\
+Using python3:\
+The default version on quark is python 2.6 due to the RH distribution installed (see Sasko\'92s email). \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "https://access.redhat.com/documentation/en-US/Red_Hat_Software_Collections/2/html-single/2.3_Release_Notes/index.html#sect-Usage-Use"}}{\fldrslt \cf0 https://access.redhat.com/documentation/en-US/Red_Hat_Software_Collections/2/html-single/2.3_Release_Notes/index.html#sect-Usage-Use}}\
+We can however use python 3 via the following. Suppose \'91hello.py\'92 is the name of the file I want python to run.  To use python 3 and not the default 2.6:\
+\
+scl enable python33 \'91python hello.py\'92\
+\
+\
+However, this does not allow one to install additional packages on python3, such as Healpy. The SCL installation of python3 doe have spicy and numpy. If you do not need additional extensions then this is a good alternative. If you want to do a fresh installation of python3 under your home folder, see the file \'93InstallCondaOnQuark\'94 for instructions on that.  \
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b \cf0 Useful Commands:\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b0 \cf0 \
+Check IP address and network info: /sbin/ifconfig\
+Check CPUs: lscpu \
+		or	\
+		cat /proc/cpuinfo\
+		more such commands: http://www.binarytides.com/linux-cpu-information/ \
+\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b \cf0 Helpful links:\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b0 \cf0 \
+Yale\'92s cluster website. Our cluster works pretty much the same way so this is quite useful:\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "http://research.computing.yale.edu/support/hpc/user-guide"}}{\fldrslt \cf0 http://research.computing.yale.edu/support/hpc/user-guide}}\
+\
+The single most useful document is the PBS (Portable Batch System \'97 the system that Quark uses) User Guide which is available online.\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b \cf0 \ul \ulc0 Cluster Computing:
+\b0 \ulnone \
+\
+Now that SSH works, there\'92s two ways we can go with parallelizing what we have:\
+\
+1) Use scripts: This is the standard way to use cluster computing. The good part about this is that Gerry and Keegen and Ted all have experience with this. The downside is that it is messy, requires me to learn writing code in shell script.\
+\
+2) Use a python library: \'93Dispy\'94 seems to be a good candidate for this, although there are several others (see python ParallelProcessing Wiki). Since python is itself a scripting language, we can use these libraries to just incorporate parallel computing within our code. This seems to be quite helpful\'85.. however, the downside is that no one else knows how to use this here, and that it requires installations of some python libraries on the Quark which I don\'92t think I\'92ll have permissions to do.\
+\
+Currently, I\'92m more inclined towards using the latter option mostly because it seems more accessible. I\'92m trying to learn shell script simultaneously though, so let\'92s see how that goes\'85.\
+\
+Update: I spent many days trying to do the latter option but it is more complicated then what first meets the eye. Too many bottlenecks. It is better to do the scripting method, details of which I will write down soon.\
+\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+TO check status of clusters: quark.richmond.edu/ganglia\
+\
+\
+To remove the need for entering passwords eveytime you ssh or scp:\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "https://blogs.oracle.com/jkini/how-to-scp,-ssh-and-rsync-without-prompting-for-password"}}{\fldrslt \cf0 https://blogs.oracle.com/jkini/how-to-scp,-ssh-and-rsync-without-prompting-for-password}}\
+\
+Note: If you, at any point, override the existing authorized_keys file then follow instructions for generating a new key pair:\
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/5/html/Deployment_Guide/s2-openssh-generate-keypairs.html\
+And use \'93cat id_rsapub >> authorized_keys\'94 to append the key pair so you can still access the worker nodes.  \
+\
+\
+To search for a file via terminal:\
+find ~ -name 
+\i NameOfFile
+\i0 \
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f1 \cf2 \cb3 \CocoaLigature0 qdel `seq -f "%.0f" 126021 126126`\
+\
+\
+\cf4 \cb5 \
+{\field{\*\fldinst{HYPERLINK "http://research.computing.yale.edu/support/hpc/user-guide/submitting-jobs-using-torque"}}{\fldrslt http://research.computing.yale.edu/support/hpc/user-guide/submitting-jobs-using-torque}}\
+\
+Intro to parallel processing: {\field{\*\fldinst{HYPERLINK "http://sebastianraschka.com/Articles/2014_multiprocessing.html#the-process-class"}}{\fldrslt http://sebastianraschka.com/Articles/2014_multiprocessing.html#the-process-class}}\
+\
+WHEN PARALLELIZING YOUR CODE, BE WARY OF MEMORY LEAKS.\
+}

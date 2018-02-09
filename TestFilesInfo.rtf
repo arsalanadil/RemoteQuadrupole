@@ -1,0 +1,44 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf820
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 I\'92m creating this document to keep track of all the testing files I create. This is important because in the past I\'92ve created several of these \'93.npy\'94 files for storage purposes but forget their exact details after a while\'85. And sometimes those are impossible to figure out (names can only be so descriptive). This is an attempt to be more organized and systematic about this. \
+\
+1. Cross10ClustersR3.npy: Contains 2 arrays for the variance and correlation matrices of a cross correlation for n=10 clusters and lmax = 3. shape=(2,10,12).  Recall that lmax = l^2 + 2l -3.\
+The cluster values are the first 10 rows from \'93rand20Clusters.npy\'94. \
+\
+2. Cross5ClustersR2.npy: Contains 2 arrays for the variance and correlation matrices of a cross correlation for n=5 clusters and lmax = 4. \
+The cluster values are the first 5 rows from \'93rand20Clusters.npy\'94. \
+\
+2.1: CovRel2.npy: The result of using the above (Cross5ClustersR2.npy) in COVandREL.py. Contains two arrays: the first the Covariance matrix, the second is the relation matrix\
+\
+3. Cross2ClustersR1.npy: Contains 2 arrays for the variance and correlation matrices of a cross correlation for n=2 clusters and lmax = 3. shape is (2,2,12)\
+The cluster values are the first 2 rows from \'93rand20Clusters.npy\'94. \
+\
+4. Cross10ClustersL8.npy: Contains 2 arrays for the variance and correlation matrices of a cross correlation for n=10 clusters and lmax = 8. shape is (2,10,77) \
+The cluster values are the first 10 rows from \'93rand20Clusters.npy\'94. \
+\
+5. RealValGammaN5L4.npy: Real valued covariance matrix (generated using RealValuedGMat.py) till max = 4 and cluster locations(5):\
+v1 = np.array([10,0,0])\
+v2 = np.array([6,0,0])\
+v3 = np.array([3,0,0])\
+v4 = np.array([2.6,0,0])\
+v5 = np.array([1.76,0,0]) \
+Matrix is symmetric and positive definite \
+\
+6. gammaRL5N10.npy: Real Valued covariance matrix till Lmax=5 and number of clusters=10;\
+Two of the eigenvalues come out to be slightly negative\'85.not sure why because this code generally works. \
+\
+7. gammaRL5N500.npy: Real Valued covariance matrix till Lmax=5, N=500 using rand500Clusters.npy. This one was generated after solving the issue of positive definiteness (so I might just get rid of all the old ones) and is indeed positive definite. \
+\
+There\'92s also some other .py files I\'92ve created for testing purposes:\
+\
+1. RealValuedGmat.py: This one (terrible naming convention btw) is to use after we\'92ve generated a certain Covariance and Relation matrix. This generates the real-valued gamma matrix from the different pieces of the two matrices. This should be hermitian and positive definite.\
+\
+2. TestingCOVandREL.py: For plotting Elm(r) vs multipoles for different redshifts. See pg 57 for details. \
+(Discard the above piece of code (2). It is redundant. I actually once wrote a much better routine called \'93PlotTests.py\'94 which does the job much better! Use that. \
+\
+}

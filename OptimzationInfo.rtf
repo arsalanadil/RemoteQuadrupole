@@ -1,0 +1,87 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf820
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\b\fs24 \cf0 \ul \ulc0 Optimization:\
+
+\b0 \ulnone \
+The task now is to optimize what we have so far so we can get results faster. I\'92m creating new files for this purpose so that we can make changes and compare the answers and time changes with the old code. Here are the methods being used to optimize for speed:\
+\
+
+\b 1. Numba:
+\b0  The Numba package speeds up mathematical operations in Python (by converting to Fortran/C). The changes to be made, using the @jit and @generated_jit \'93decorators\'94, are a little painful but definitely doable. I played around with this on my Linux and got a speedup of 5x for the Remote Quadrupole code. \
+This required significant changes which I will outline below (soon)\
+\
+\
+
+\b 2. Removed powerSpec as an argument
+\b0 . Now declared as method and called upon from inside the function.\
+\
+
+\b 3. INTERPOLATING THE TRANSFER FUNCTION ISW TERM:
+\b0 \
+The idea here is to generate a table of k and z values over which to evaluate the ISW term so that we don\'92t have to carry out the integration every time (the one over z\'92 or eta\'92 in the ISW term). We have to do this for L=2,3,4, and 5  but we only have to do it once so it saves us a lot of computational time in the long run. Generating the tables the first time takes a while though (which is fine), and is generated using the routine, \'93interpTestTransFunc.py\'94. The files are saved as \'93ISWL2.npz\'94, \'93ISWL3.npz\'94 etc. (to see how each of the sub-arrays are labelled within each .npz file, see the description in \'93Files\'94 below).\
+\
+VERY IMPORTANTLY, note that for computing the cross correlations, we are only interested in the 
+\i local 
+\i0 multipoles (i.e. at z=0) and therefore only need 1D interpolation! These files are saved as ISWL3Z0.npz, ISWL4Z0.npz etc. \
+\
+Note that we need the interpolation in \'93k\'94 to be quite fine, specially for k<50. However, striking the right balance is challenging as too fine of a grid makes interpolation computationally intensive and defeats the purpose of doing this in the first place. Note that for k>50, the ISW term drops quite rapidly is fairly flat. For this reason, it is optimal to brake up the sampling in k into two \'93pieces\'94:\
+\
+k1 =  np.arange(0,50,0.1)\
+k2 = np.arange(50,300,2)\
+k = np.concatenate([k1,k2])\
+\
+The redshift values need to be very fine as our code is sensitive to cluster redshifts. We only care up to z=3 though (I\'92m doing z=4 to be safe). \
+\
+I have tested this quite extensively for each L value (which is why its taking so long to do it!) so I\'92m fairly confident in this. For the quadrupole code, this leads to a speedup of a factor of 2, but since that has complexity O(n^2), a factor of two can be significant in human time. I have also added the option of turning Interpolation on or off by changing the value of the variable \'93Interpolate\'94. \
+\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+Files:\
+\
+1. RemoteQuad.py: Renamed and optimized version of VarMatrix_Generalized.py\
+\
+2. CrossCor.py: Renamed and optimized version of VarMatrix_Gen_Local.py\
+\
+3. TransFuncOpt: Optimized version of TransferFunction.py and TransFuncGen.py. Yes, those are now in the same place. Additionally, for the spherical Bessel function method, I have used Mathematica\'92s function expand and copied the expanded form of the function. This gives a speed boost of around 2x. \
+\
+4. ISWL2.npz: This stores the arrays required to interpolate over the ISW term in the transfer function. Note that for .npz files you need to save and load by specific names. The convention I\'92m using for these files is:\
+\
+	np.savez_compressed("ISWL2",kVals = kkk,zvals = zz,isw = zVals) \
+	kk = interpTable['kVals']\
+	zz = interpTable['zvals']\
+	isw = interpTable['isw']\
+	ISWinterp = interpolate.RectBivariateSpline(kk,zz,isw)\
+\
+Generated using InterpTestTransFunc.py (beware: this piece of code is terribly documented!). \
+\
+Yes the bit about zvals is fairly confusing (I take full blame for that). While saving, \'93zVals\'94 is the output value of the ISW term but while loading, \'93zvals\'94 is the redshift values\'85.oops. \
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+Testing:\
+\
+There are many ways to test this code, specially by comparing with previously written code\'85 although that is extremely slow (hence the need for optimization in the first place). But another excellent way to test the cross correlation code (and if the others are internally consistent then we\'92re on the right track), is to use the plots we made to compare our results Hall and Challiinor. Specificallly, the cross correlation when normalized to the spin-2 spherical harmonics, should be independent of m and the direction (theta and phi) of the cluster location. I tested this and it works (as it did for the previous code). The speedup is immense!\
+\
+Code: \
+#Note: import Spin2Harmonics as SWSH\
+\
+z = 1\
+l=3\
+m=-1#m must be less than l\
+V1 = np.array([z,0,0])\
+V2 = np.array([z,1.1,2.2])\
+V3 = np.array([z,2.3,0.69])\
+t0 = time.time()\
+f1 = wignerRotation(V1, l)[0][0][m+l]\
+s1 = SWSH.sYlm(2,l,m,V1[2],V1[1])#spinweight (want 2), l,m,phi,theta\
+f2 = wignerRotation(V2, l)[0][0][m+l]\
+s2 = SWSH.sYlm(2,l,m,V2[2],V2[1])\
+f3 = wignerRotation(V3, l)[0][0][m+l]\
+s3 = SWSH.sYlm(2,l,m,V3[2],V3[1])\
+print("VarMatrixGenLocal.py.....","zeta1:", f1/s1,"zeta2:", f2/s2, "zeta3:",f3/s3)\
+t1 = time.time()\
+print("Time this process took: ", (t1-t0)) }

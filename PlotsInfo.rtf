@@ -1,0 +1,218 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf820
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 This document contains information on plots and what they contain, how they were produced etc.\
+This is so that I don\'92t need to keep long descriptive names everytime I generate a plot. And so that plots are reusable later.\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b \cf0 1. \'93Covariance With Local Quadrupole v. Z.png\'94: \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b0 \cf0 This with is quite self explanatory. It just gives the covariance of the local quadrupole with remote quadrupoles as a function of redshift (x-axis). Generated using \'93VarMatrix_Generalized.py\'94 (and confirmed using \'93VarMatrix_Gen_Local.py\'94 (the cross correlation code). \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\i \cf0 Code:
+\i0 \
+\
+zlist = np.arange(50)/10\
+toPlot = [wignerRotation( np.array([0,0,0] ),np.array([zlist[i],0,0]))[0][0][0]/1.89 for i in range(zlist.shape[0])]\
+#1.89 is the normalization!!!!\
+plt.figure()\
+plt.plot(zlist,toPlot)\
+plt.show()\
+\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b \cf0 2.  Correlation vs L for z=0,0.1,0.2,0.3.png: \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b0 \cf0 (Now you see the need for this document?). Generates correlations (see page 57 of notes) for a given remote quadrupole cluster location with the local multipole (upto l=4). Generated using PlotTests.py (see TestFilesInfo doc). The y-axis contains the thing we call xi_\{l,2\}\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\i \cf0 Basic Code:\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\i0 \cf0 \
+z = 0.4#red-shit you want\
+lmax = 4#upto what local multipole?\
+m = 2#this will stay as two\'85.\
+temp = makePlot(z,lmax,m)#we want to plot \'93temp\'94    \
+print(temp)\
+  \
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b \cf0 3. Summed Square Correlations vs Redshift.png:\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\b0 \cf0 Created using PlotTests.py. Shows the sums of the correlation function for clusters on the z-axis with redshifts 0-1. Note: The y-axis label is slightly misleading. It\'92s actually a sum from l=2 to l=5 not lmax. i.e., it is not a running sum!
+\b \
+\
+\
+
+\b0 lmax = 5\
+m = 2\
+n = 10    \
+sumCor = np.zeros(n)\
+#zVar = np.zeros((n,3))\
+i = 0        \
+for z in range(0,n):\
+    sumCor[z] = np.sum(makePlot(z/10,lmax,m)) \
+    #zVar[i] = makePlot(z/10,lmax,m)\
+\
+print(sumCor)\
+plt.plot(np.arange(0,10)/10,sumCor)\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+4. Angular Power Spectrum: Local angular power spectrum (Cls). Generated using LocalPS.py.\
+	Hasn\'92t been normalized. Our normaliation factor is 256.2792 (with remote and cross code).\
+Code:\
+\
+lmax = 60\
+lList = np.arange(2,lmax+1)\
+temp = np.zeros(lmax-1)\
+for l in range(2,lmax+1):\
+    temp[l-2] =  l*(l+1)*(Integral(l, powerSpec))\
+\
+print(temp)\
+plt.plot(lList,temp)\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+5. 
+\b C2(z).png
+\b0 : Reproduction of Jamie Portsmouth Fig.2. i.e. shows the angular power spectrum at l=2 (C2) as seen by a hypothetical observer sitting at z. \
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\i \cf0 Code:
+\i0  \
+\
+n=1000#first plot z=0.1 to z=100\
+clusterList = np.zeros((n,3))\
+for z in range(0,n):\
+    clusterList[z] = np.array([z/10,0,0])\
+    \
+c2 = np.zeros(n)\
+for i in range(0,n):\
+    c2[i] = wignerRotation(clusterList[i,:],clusterList[i,:])[0][0][0]#this is wignerRotation from VarMatrix_Generalized.py\
+\
+print("This window plots C2(z) vs Z")\
+plt.figure(5)\
+plt.semilogx(np.arange(0,n/10,0.1), c2,'r')\
+\
+    \
+n=100#now plot z = 0.001 to z=0.1\
+clusterList2 = np.zeros((n,3))\
+for z in range(0,n):\
+    clusterList2[z] = np.array([z/1000,0,0])\
+    \
+c22 = np.zeros(n)\
+for i in range(0,n):\
+    c22[i] = wignerRotation(clusterList2[i,:],clusterList2[i,:])[0][0][0]#this is wignerRotation from VarMatrix_Generalized.py\
+\
+print("This window plots C2(z) vs Z")\
+plt.figure(5)\
+plt.semilogx(np.arange(0,n/1000,0.001), c22,'r')\
+\
+\
+6. C2(z) Different Power Specs.png: Same thing as the above, except with slightly perturbed power spectrums. See legend in the plot. \
+Note: This actually does not give the right answer. Reason is that we\'92re cutting off our k integral at a very early limit. Instead, see \'93C2(z) v Z increased K limit.png\'94 \
+\
+7. C2(z) v Z increased K limit.png: Same thing as before, except that the integration limit has been increased. Interesting to check for different power spectra now. \
+\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+8. Summed Correlation Running  L: This is also quite self explanatory. This represents a running sum over l for the cross correlation between local multipole and remote quadrupole. So the value at l=4 is the sum of l=2, l=3, and l=4 and so on. Generated using PlotTests.py. \
+\
+Code: \
+\
+lmax = 5\
+m = 2\
+\
+z = 3#change this to whatever redshift value you want\
+summedLVals = np.zeros(lmax-1)\
+for l in range(2,lmax+1):\
+    summedLVals[l-2] = np.sum(makePlot(z,l,m))\
+\
+print("The Sum over L values is:", summedLVals)\
+plt.figure(2)\
+plt.show()    \
+plt.plot(np.arange(2,lmax+1), summedLVals)\
+plt.title("Running Sum over L at different RedShifts")\
+\
+Note: you have to change the thing that is being returned by makePlot(..). Specifically, change Elm to Elm**2 so that you have the sum of the 
+\i squares.
+\i0 \
+\
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+9. HallChallinorTest.png: This is mean to be compared with Hall and Challinor Fig. 2. This is a great test for our work \'97 and matches with their results (for the most part), which is awesome. Generated using TestingHallChall.py.\
+\
+Code:\
+\
+\
+"""\
+We can now test this against Fig. 2. Note that if this works, that's really really good news because we will then have an external check on our work!\
+\
+"""\
+z=0.025#0.025,0.425,0.975\
+lmax = 5\
+m = -2\
+\
+result = np.zeros(lmax-1).astype(complex)\
+toPlot = np.zeros(lmax-1)\
+for j in range(2,lmax+1):\
+    flm = Cross.wignerRotation(np.array([z,1,1]),j, Cross.powerSpec)[0][0][j+m]\
+    ylm = SWSH.sYlm(2,j,m,1,1)\
+    result[j-2] = (flm/ylm)\
+    toPlot[j-2] = np.abs(flm/ylm)\
+ \
+         \
+plt.plot(np.arange(2,lmax+1), toPlot, label="z = 0.025")\
+\
+z=0.425#0.025,0.425,0.975\
+lmax = 5\
+m = -2\
+\
+result1 = np.zeros(lmax-1).astype(complex)\
+toPlot1 = np.zeros(lmax-1)\
+for j in range(2,lmax+1):\
+    flm = Cross.wignerRotation(np.array([z,1,1]),j, Cross.powerSpec)[0][0][j+m]\
+    ylm = SWSH.sYlm(2,j,m,1,1)\
+    result1[j-2] = (flm/ylm)\
+    toPlot1[j-2] = np.abs(flm/ylm)\
+ \
+         \
+plt.plot(np.arange(2,lmax+1), toPlot1, label="z=0.425")\
+\
+z=0.975#0.025,0.425,0.975\
+lmax = 5\
+m = -2\
+\
+result2 = np.zeros(lmax-1).astype(complex)\
+toPlot2 = np.zeros(lmax-1)\
+for j in range(2,lmax+1):\
+    flm = Cross.wignerRotation(np.array([z,1,1]),j, Cross.powerSpec)[0][0][j+m]\
+    ylm = SWSH.sYlm(2,j,m,1,1)\
+    result2[j-2] = (flm/ylm)\
+    toPlot2[j-2] = np.abs(flm/ylm)\
+ \
+         \
+plt.plot(np.arange(2,lmax+1), toPlot2,label= "z =0.975")\
+#note, these are plots on linear scale. To compare with HandC, plot on log scale. \
+\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \ul \ulc0 10. Seto and Pierpaoli Figures:\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \ulnone There\'92s a bunch of figures that I\'92ve generated for the purposes of testing our code using Seto and Pierpaoli\'92s paper. All of these, in some way or the other are an attempt to reproduce Fig. 2 form their paper. This is actually a good confirmation and }
