@@ -294,7 +294,7 @@ def wignerRotation(V1,V2):
     return corelation[0][0], corelation[0][4]
 
 #import gc
-from contextlib import closing
+#from contextlib import closing
 #from multiprocessing import Process
 def paralFunc(v1,v2):
     #print(i)
@@ -315,6 +315,7 @@ def parallelScatter(number):
 
 if __name__ == '__main__':
     n = 10752
+    #n = 100
     #number = 2
     #segments = 3
     number = int(sys.argv[1])
@@ -355,26 +356,29 @@ if __name__ == '__main__':
     print(start,end)
     print(start,end)
     print(start,end)
+    
+    p = Pool()
+    
+    temp = (p.starmap(paralFunc, [(clusters[i], clusters[j]) for i in range(start,end) for j in range(0,i+1)] ))
+    start = end
+    #p.close()
+    #p.join()
+    #p.terminate()
+    #print(p)
         
-    with closing(Pool()) as p:
-        temp = (p.starmap(paralFunc, [(clusters[i], clusters[j]) for i in range(start,end) for j in range(0,i+1)] ))
+    for x in range(2,pDivs+1):
+        end = nStart+int(x*(nEnd-nStart)/pDivs)
+        print(start,end)
+        print(start,end)
+        print(start,end)
+        print(start,end)
+        #with closing(Pool()) as p:
+        temp2 = (p.starmap(paralFunc, [(clusters[i], clusters[j]) for i in range(start,end) for j in range(0,i+1)] ))
+        #print(p)
         start = end
-        p.close()
-        p.join()
-        p.terminate()
-        
-    for i in range(2,pDivs+1):
-        end = nStart+int(i*(nEnd-nStart)/pDivs)
-        print(start,end)
-        print(start,end)
-        print(start,end)
-        print(start,end)
-        with closing(Pool()) as p:
-            temp2 = (p.starmap(paralFunc, [(clusters[i], clusters[j]) for i in range(start,end) for j in range(0,i+1)] ))
-        start = end
-        p.close()
-        p.join()
-        p.terminate()
+        #p.close()
+        #p.join()
+        #p.terminate()
         temp = np.concatenate([temp,temp2])
         #temp = temp.append(temp2)
     #print(temp)
